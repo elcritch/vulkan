@@ -32959,7 +32959,10 @@ var
   vkEnumerateInstanceVersion*: proc (pApiVersion: ptr uint32): VkResult {.stdcall.}
 
 proc vkPreload*(load1_1: bool = true) =
-  vkGetInstanceProcAddr = cast[proc (instance: VkInstance, pName: cstring): PFN_vkVoidFunction {.stdcall.}](symAddr(vkHandleDLL, "vkGetInstanceProcAddr"))
+  when defined(vkCustomLoader):
+    vkGetInstanceProcAddr = cast[proc (instance: VkInstance, pName: cstring): PFN_vkVoidFunction {.stdcall.}](vkGetProc("vkGetInstanceProcAddr"))
+  else:
+    vkGetInstanceProcAddr = cast[proc (instance: VkInstance, pName: cstring): PFN_vkVoidFunction {.stdcall.}](symAddr(vkHandleDLL, "vkGetInstanceProcAddr"))
 
   vkCreateInstance = cast[proc (pCreateInfo: ptr VkInstanceCreateInfo, pAllocator: ptr VkAllocationCallbacks, pInstance: ptr VkInstance): VkResult {.stdcall.}](vkGetProc("vkCreateInstance"))
   vkEnumerateInstanceExtensionProperties = cast[proc (pLayerName: cstring, pPropertyCount: ptr uint32, pProperties: ptr VkExtensionProperties): VkResult {.stdcall.}](vkGetProc("vkEnumerateInstanceExtensionProperties"))
